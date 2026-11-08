@@ -3,6 +3,7 @@
 use App\Models\Category;
 use App\Models\Menu;
 use App\Models\User;
+use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -108,6 +109,68 @@ it('penjual dapat memperbarui harga, stok, dan status menu', function () {
         ->stock->toBe(12)
         ->is_available->toBeFalse()
         ->is_popular->toBeTrue();
+});
+
+it('menjaga pengurangan stok pesanan saat penjual menyimpan stok usang', function () {
+    $this->menu->update(['stock' => 10]);
+
+    $siswa = User::where('role', 'siswa')->first();
+
+    app(OrderService::class)->place(
+        $siswa,
+        [['menu_id' => $this->menu->id, 'quantity' => 4]],
+        'istirahat_1',
+    );
+
+    expect($this->menu->fresh()->stock)->toBe(6);
+
+    $this->actingAs($this->vendor)
+        ->patch(route('vendor.menu.update', $this->menu), [
+            'price' => $this->menu->price,
+            'stock' => 10,
+            'stock_baseline' => 10,
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    expect($this->menu->fresh()->stock)->toBe(6);
+});
+
+it('menerapkan selisih penambahan stok terhadap stok terbaru', function () {
+    $this->menu->update(['stock' => 10]);
+
+    $siswa = User::where('role', 'siswa')->first();
+
+    app(OrderService::class)->place(
+        $siswa,
+        [['menu_id' => $this->menu->id, 'quantity' => 4]],
+        'istirahat_1',
+    );
+
+    $this->actingAs($this->vendor)
+        ->patch(route('vendor.menu.update', $this->menu), [
+            'price' => $this->menu->price,
+            'stock' => 20,
+            'stock_baseline' => 10,
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    expect($this->menu->fresh()->stock)->toBe(16);
+});
+
+it('menolak penyesuaian stok yang membuat stok negatif', function () {
+    $this->menu->update(['stock' => 2]);
+
+    $this->actingAs($this->vendor)
+        ->patch(route('vendor.menu.update', $this->menu), [
+            'price' => $this->menu->price,
+            'stock' => 0,
+            'stock_baseline' => 10,
+        ])
+        ->assertSessionHasErrors('stock');
+
+    expect($this->menu->fresh()->stock)->toBe(2);
 });
 
 it('penjual dapat menghapus menu miliknya', function () {

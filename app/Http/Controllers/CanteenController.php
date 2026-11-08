@@ -17,6 +17,7 @@ class CanteenController extends Controller
         $stalls = Stall::withCount('menus')->where('is_active', true)->get();
         $categories = Category::orderBy('id')->get();
         $popularMenus = Menu::with('stall')
+            ->whereHas('stall', fn ($s) => $s->where('is_active', true))
             ->where('is_available', true)
             ->where('is_popular', true)
             ->take(8)
@@ -35,6 +36,7 @@ class CanteenController extends Controller
         $categories = Category::orderBy('id')->get();
 
         $query = Menu::with(['stall', 'category'])
+            ->whereHas('stall', fn ($s) => $s->where('is_active', true))
             ->where('is_available', true);
 
         if ($request->filled('q')) {
@@ -57,6 +59,10 @@ class CanteenController extends Controller
      */
     public function stall(Stall $stall)
     {
+        if (! $stall->is_active) {
+            abort(404);
+        }
+
         $stall->load(['menus.category', 'owner']);
         $menus = $stall->menus()->where('is_available', true)->get();
 

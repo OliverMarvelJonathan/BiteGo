@@ -57,6 +57,7 @@
             <div class="lg:col-span-3">
                 <form method="POST" action="{{ route('orders.store', $menu) }}" class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
                     @csrf
+                    <input type="hidden" name="idempotency_key" value="{{ $idempotencyKey }}">
 
                     <h3 class="text-sm font-bold text-gray-900 mb-5 flex items-center gap-2">
                         <i class="fa-solid fa-clipboard-list text-emerald-500"></i> Detail Pesanan
@@ -147,8 +148,8 @@
 
 @push('scripts')
 <script>
-    const price = {{ $menu->price }};
-    const maxStock = {{ $menu->stock }};
+    const price = {{ (int) $menu->price }};
+    const maxStock = {{ (int) $menu->stock }};
 
     function step(dir) {
         const input = document.getElementById('quantity');
