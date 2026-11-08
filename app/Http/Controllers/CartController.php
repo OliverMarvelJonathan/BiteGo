@@ -29,7 +29,7 @@ class CartController extends Controller
     {
         $data = $request->validate([
             'menu_id' => ['required', 'integer', 'exists:menus,id'],
-            'quantity' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'quantity' => ['nullable', 'integer', 'min:1'],
         ]);
 
         $menuId = (int) $data['menu_id'];
@@ -71,7 +71,7 @@ class CartController extends Controller
     public function update(Request $request, Menu $menu, CartService $cart)
     {
         $data = $request->validate([
-            'quantity' => ['required', 'integer', 'min:0', 'max:10'],
+            'quantity' => ['required', 'integer', 'min:0'],
         ]);
 
         $cart->update($menu->id, (int) $data['quantity']);
@@ -108,7 +108,7 @@ class CartController extends Controller
     {
         $data = $request->validate([
             'menu_id' => ['required', 'integer', 'exists:menus,id'],
-            'quantity' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'quantity' => ['nullable', 'integer', 'min:1'],
         ]);
 
         $cart->replaceWith((int) $data['menu_id'], (int) ($data['quantity'] ?? 1));
