@@ -66,6 +66,20 @@
                                 <span>Menu & Stok</span>
                             </a>
                         @else
+                            @php
+                                $cartRaw = session('bitego_cart.items', []);
+                                $cartCount = is_array($cartRaw) ? array_sum($cartRaw) : 0;
+                            @endphp
+                            <a href="{{ route('cart.index') }}"
+                               class="flex items-center gap-4 px-4 py-3 rounded-xl transition {{ request()->routeIs('cart.*', 'checkout.*') ? 'bg-mint-700 text-white font-medium shadow-sm' : 'text-emerald-100 hover:bg-mint-900' }}">
+                                <i class="fa-solid fa-cart-shopping text-lg"></i>
+                                <span>Keranjang</span>
+                                @if ($cartCount > 0)
+                                    <span class="ml-auto bg-sunshine-400 text-gray-900 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                        {{ $cartCount }}
+                                    </span>
+                                @endif
+                            </a>
                             <a href="{{ route('orders.index') }}"
                                class="flex items-center gap-4 px-4 py-3 rounded-xl transition {{ request()->routeIs('orders.*') ? 'bg-mint-700 text-white font-medium shadow-sm' : 'text-emerald-100 hover:bg-mint-900' }}">
                                 <i class="fa-solid fa-receipt text-lg"></i>
@@ -133,6 +147,26 @@
                     </div>
                     <span class="font-bold text-gray-900">BiteGo</span>
                 </div>
+                @auth
+                    @if (! auth()->user()->isVendor())
+                        @php
+                            $cartRaw = session('bitego_cart.items', []);
+                            $mobileCartCount = is_array($cartRaw) ? array_sum($cartRaw) : 0;
+                        @endphp
+                        <a href="{{ route('cart.index') }}" class="relative p-2.5 bg-white rounded-xl shadow-sm border border-gray-100 text-gray-700">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            @if ($mobileCartCount > 0)
+                                <span class="absolute -top-1 -right-1 bg-sunshine-400 text-gray-900 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                    {{ $mobileCartCount }}
+                                </span>
+                            @endif
+                        </a>
+                    @else
+                        <div class="w-9"></div>
+                    @endif
+                @else
+                    <div class="w-9"></div>
+                @endauth
             </div>
 
             {{-- Flash messages --}}

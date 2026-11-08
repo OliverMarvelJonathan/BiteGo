@@ -27,57 +27,133 @@
 
         {{-- Status tracker --}}
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-6">
-            <h3 class="text-sm font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <i class="fa-solid fa-route text-emerald-500"></i> Status Pesanan
-            </h3>
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-route text-emerald-500"></i> Lacak Status Pesanan
+                </h3>
+                @if ($order->statusLogs->isNotEmpty())
+                    <span class="text-[10px] text-gray-400 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full font-semibold">
+                        <i class="fa-solid fa-clock-rotate-left text-emerald-500 mr-1"></i> {{ $order->statusLogs->count() }} pembaruan tercatat
+                    </span>
+                @else
+                    <span class="text-[10px] text-gray-400 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full font-semibold">
+                        Tercatat dari sistem
+                    </span>
+                @endif
+            </div>
 
             @php
+                $logsByStatus = $order->statusLogs->keyBy('status');
+                $hasHistoricalLogs = $order->statusLogs->isNotEmpty();
+
                 $steps = [
-                    'menunggu' => ['Menunggu', 'Pesanan masuk dan menunggu diproses penjual.', 'fa-regular fa-clock'],
-                    'dimasak' => ['Dimasak', 'Penjual sedang menyiapkan pesananmu.', 'fa-solid fa-fire'],
-                    'siap_ambil' => ['Siap Ambil', 'Pesanan siap! Ambil di Express Pickup.', 'fa-solid fa-bolt'],
-                    'selesai' => ['Selesai', 'Pesanan sudah diambil. Selamat menikmati!', 'fa-solid fa-circle-check'],
+                    'menunggu' => ['Menunggu', 'Pesanan masuk dan antre untuk disiapkan.', 'fa-regular fa-clock'],
+                    'dimasak' => ['Dimasak', 'Penjual sedang memasak dan mengemas hidangan.', 'fa-solid fa-fire'],
+                    'siap_ambil' => ['Siap Ambil', 'Pesanan siap diambil di konter Express Pickup.', 'fa-solid fa-bolt'],
+                    'selesai' => ['Selesai', 'Pesanan telah diambil oleh siswa.', 'fa-solid fa-circle-check'],
                 ];
-                if ($order->status === 'dibatalkan') {
-                    $steps = ['dibatalkan' => ['Dibatalkan', 'Pesanan dibatalkan.', 'fa-solid fa-circle-xmark']];
-                }
+
                 $stepKeys = array_keys($steps);
+                $isCancelled = $order->status === 'dibatalkan';
                 $currentIndex = array_search($order->status, $stepKeys);
-                $done = $currentIndex > 0;
             @endphp
 
-            <div class="space-y-0 relative">
-                @foreach ($steps as $key => [$label, $desc, $icon])
-                    @php
-                        $active = $key === $order->status;
-                        $completed = array_search($key, $stepKeys) < $currentIndex || ($order->status === 'selesai' && $key !== 'selesai');
-                    @endphp
-                    <div class="flex items-start gap-4 relative pb-8 last:pb-0">
-                        @if (! $loop->last)
-                            <div class="absolute left-[19px] top-10 bottom-0 w-0.5 {{ $completed ? 'bg-emerald-400' : 'bg-gray-200' }}"></div>
-                        @endif
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 relative z-10 text-sm
-                            {{ $active ? 'bg-mint-400 text-white shadow-lg shadow-emerald-500/30' : ($completed ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400') }}">
-                            @if ($completed)
-                                <i class="fa-solid fa-check"></i>
-                            @else
-                                <i class="{{ $icon }}"></i>
-                            @endif
+            @if ($isCancelled)
+                {{-- Cancelled State Timeline --}}
+                <div class="space-y-4 mb-4">
+                    <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-sm">
+                            <i class="fa-solid fa-circle-xmark text-lg"></i>
                         </div>
-                        <div class="pt-1.5">
-                            <p class="font-bold text-sm {{ $active ? 'text-mint-700' : ($completed ? 'text-gray-600' : 'text-gray-400') }}">
-                                {{ $label }}
-                                @if ($active)
-                                    <span class="ml-2 inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-sunshine-400 text-gray-900">
-                                        <i class="fa-solid fa-circle text-[5px] animate-pulse"></i> Terkini
-                                    </span>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="text-sm font-bold text-rose-800">Pesanan Dibatalkan</h4>
+                                <span class="text-[10px] font-bold bg-rose-200 text-rose-800 px-2 py-0.5 rounded-full">Final</span>
+                            </div>
+                            <p class="text-xs text-rose-600 mt-0.5">
+                                Pesanan ini telah dibatalkan dan stok menu telah dipulihkan.
+                            </p>
+                            <p class="text-[11px] text-rose-500 mt-2 font-mono flex items-center gap-1.5">
+                                <i class="fa-solid fa-clock"></i>
+                                Waktu Pembatalan:
+                                @if ($logsByStatus->has('dibatalkan'))
+                                    {{ $logsByStatus->get('dibatalkan')->created_at->format('d M Y, H:i') }} WIB
+                                @else
+                                    {{ $order->updated_at->format('d M Y, H:i') }} WIB
                                 @endif
                             </p>
-                            <p class="text-xs text-gray-400 mt-0.5">{{ $desc }}</p>
                         </div>
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @else
+                {{-- Normal Lifecycle Timeline --}}
+                <div class="space-y-0 relative">
+                    @foreach ($steps as $key => [$label, $desc, $icon])
+                        @php
+                            $stepIndex = array_search($key, $stepKeys);
+                            $active = $key === $order->status;
+                            $completed = $stepIndex < $currentIndex || $order->status === 'selesai';
+
+                            // Timestamp calculation: from log or fallback
+                            $stepLog = $logsByStatus->get($key);
+                            $timestamp = null;
+
+                            if ($stepLog) {
+                                $timestamp = $stepLog->created_at->format('d M Y, H:i') . ' WIB';
+                            } elseif (! $hasHistoricalLogs) {
+                                if ($key === 'menunggu') {
+                                    $timestamp = $order->created_at->format('d M Y, H:i') . ' WIB';
+                                } elseif ($active) {
+                                    $timestamp = $order->updated_at->format('d M Y, H:i') . ' WIB';
+                                }
+                            }
+                        @endphp
+                        <div class="flex items-start gap-4 relative pb-8 last:pb-0">
+                            @if (! $loop->last)
+                                <div class="absolute left-[19px] top-10 bottom-0 w-0.5 {{ $completed ? 'bg-emerald-400' : 'bg-gray-200' }}"></div>
+                            @endif
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 relative z-10 text-sm transition-all
+                                {{ $active ? 'bg-mint-400 text-white shadow-lg shadow-emerald-500/30 ring-4 ring-mint-100' : ($completed ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400') }}">
+                                @if ($completed && ! $active)
+                                    <i class="fa-solid fa-check"></i>
+                                @else
+                                    <i class="{{ $icon }}"></i>
+                                @endif
+                            </div>
+                            <div class="pt-1.5 flex-1 min-w-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                    <p class="font-bold text-sm {{ $active ? 'text-mint-700' : ($completed ? 'text-gray-700' : 'text-gray-400') }}">
+                                        {{ $label }}
+                                        @if ($active)
+                                            <span class="ml-2 inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-sunshine-400 text-gray-900">
+                                                <i class="fa-solid fa-circle text-[5px] animate-pulse"></i> Terkini
+                                            </span>
+                                        @elseif ($completed)
+                                            <span class="ml-2 text-[10px] font-semibold text-emerald-600">
+                                                <i class="fa-solid fa-circle-check text-[9px]"></i> Selesai
+                                            </span>
+                                        @endif
+                                    </p>
+                                    @if ($timestamp)
+                                        <span class="text-[10px] font-mono font-medium {{ $active ? 'text-mint-600 font-bold' : 'text-gray-400' }}">
+                                            <i class="fa-regular fa-clock text-[9px] mr-1"></i>{{ $timestamp }}
+                                        </span>
+                                    @else
+                                        <span class="text-[10px] text-gray-300 italic">Menunggu giliran</span>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $desc }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            @if (! $hasHistoricalLogs && ! $isCancelled)
+                <p class="text-[10px] text-gray-400 mt-4 italic text-right">
+                    * Catatan: Pesanan ini dibuat sebelum sistem log riwayat aktif; waktu disesuaikan dari catatan pesanan.
+                </p>
+            @endif
 
             @if ($order->status !== 'dibatalkan')
                 <div class="mt-4 bg-mint-50 border border-emerald-100 rounded-2xl p-4 flex items-start gap-3">

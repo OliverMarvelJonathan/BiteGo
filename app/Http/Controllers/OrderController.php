@@ -103,7 +103,7 @@ class OrderController extends Controller
             abort(403);
         }
 
-        $order->load(['items', 'stall']);
+        $order->load(['items', 'stall', 'statusLogs']);
 
         return view('orders.show', compact('order'));
     }

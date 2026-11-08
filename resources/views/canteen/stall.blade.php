@@ -55,9 +55,20 @@
                     @if ($menu->stock > 0)
                         @auth
                             @if (! auth()->user()->isVendor())
-                                <a href="{{ route('orders.create', $menu) }}" class="px-3 py-1.5 bg-mint-400 hover:bg-mint-500 text-white text-[11px] font-semibold rounded-lg flex items-center gap-1 transition">
-                                    <i class="fa-solid fa-plus text-[9px]"></i> Pesan
-                                </a>
+                                <div class="flex items-center gap-1.5">
+                                    <form action="{{ route('cart.add') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="menu_id" value="{{ $menu->id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" title="Tambah ke Keranjang"
+                                                class="w-8 h-8 bg-mint-50 hover:bg-mint-100 text-mint-700 rounded-lg flex items-center justify-center transition border border-mint-200">
+                                            <i class="fa-solid fa-cart-plus text-xs"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{{ route('orders.create', $menu) }}" class="px-3 py-1.5 bg-mint-400 hover:bg-mint-500 text-white text-[11px] font-semibold rounded-lg flex items-center gap-1 transition">
+                                        <i class="fa-solid fa-plus text-[9px]"></i> Pesan
+                                    </a>
+                                </div>
                             @endif
                         @else
                             <a href="{{ route('auth.login', ['redirect' => route('orders.create', $menu)]) }}" class="px-3 py-1.5 bg-mint-400 hover:bg-mint-500 text-white text-[11px] font-semibold rounded-lg flex items-center gap-1 transition">

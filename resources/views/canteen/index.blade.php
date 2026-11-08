@@ -174,10 +174,21 @@
                         <span class="font-bold text-emerald-600 text-sm">Rp{{ number_format($menu->price, 0, ',', '.') }}</span>
                         @auth
                             @if (! auth()->user()->isVendor() && $menu->stock > 0)
-                                <a href="{{ route('orders.create', $menu) }}"
-                                   class="px-4 py-1.5 bg-mint-400 hover:bg-mint-500 text-white text-xs font-semibold rounded-full shadow-sm transition">
-                                    Pesan
-                                </a>
+                                <div class="flex items-center gap-1.5">
+                                    <form action="{{ route('cart.add') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="menu_id" value="{{ $menu->id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" title="Tambah ke Keranjang"
+                                                class="w-7 h-7 bg-mint-50 hover:bg-mint-100 text-mint-700 rounded-lg flex items-center justify-center transition border border-mint-200">
+                                            <i class="fa-solid fa-cart-plus text-[10px]"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{{ route('orders.create', $menu) }}"
+                                       class="px-3 py-1 bg-mint-400 hover:bg-mint-500 text-white text-xs font-semibold rounded-full shadow-sm transition">
+                                        Pesan
+                                    </a>
+                                </div>
                             @elseif ($menu->stock > 0)
                                 <a href="{{ route('canteen.menu') }}" class="px-4 py-1.5 border border-emerald-400 text-emerald-600 text-xs font-semibold rounded-full hover:bg-emerald-600 hover:text-white transition">
                                     Lihat

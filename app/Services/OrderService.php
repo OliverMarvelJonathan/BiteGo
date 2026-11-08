@@ -128,6 +128,10 @@ class OrderService
                         $this->deductStock($menu->id, $quantity);
                     }
 
+                    $order->statusLogs()->create([
+                        'status' => 'menunggu',
+                    ]);
+
                     return $order;
                 }, 3);
             } catch (UniqueConstraintViolationException $e) {
@@ -210,6 +214,10 @@ class OrderService
             }
 
             $locked->update(['status' => $status]);
+
+            $locked->statusLogs()->create([
+                'status' => $status,
+            ]);
 
             if ($status === 'dibatalkan' && $locked->stock_deducted) {
                 $items = $locked->items()->orderBy('menu_id')->get();

@@ -60,6 +60,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function statusLogs()
+    {
+        return $this->hasMany(OrderStatusLog::class)->orderBy('created_at', 'asc');
+    }
+
     public function getStatusLabelAttribute(): string
     {
         return self::STATUS_LABELS[$this->status] ?? $this->status;
