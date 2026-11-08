@@ -116,6 +116,7 @@ class DatabaseSeeder extends Seeder
         $students = User::where('role', 'siswa')->get();
         $allStalls = Stall::all();
         $sampleStatuses = ['dimasak', 'siap_ambil', 'selesai', 'selesai', 'menunggu'];
+        $usedCodes = [];
 
         foreach ($allStalls as $stall) {
             $count = mt_rand(2, 3);
@@ -146,13 +147,21 @@ class DatabaseSeeder extends Seeder
                     ];
                 }
 
+                do {
+                    $pickupCode = str_pad((string) mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+                } while (isset($usedCodes[$stall->id][$pickupCode]));
+
+                $usedCodes[$stall->id][$pickupCode] = true;
+
                 $order = Order::create([
                     'order_number' => 'BG-'.date('Ymd').'-'.strtoupper(Str::random(5)),
                     'user_id' => $student->id,
                     'stall_id' => $stall->id,
                     'pickup_slot' => $i % 2 === 0 ? 'istirahat_1' : 'istirahat_2',
-                    'pickup_code' => (string) mt_rand(1000, 9999),
+                    'pickup_code' => $pickupCode,
+                    'pickup_date' => now()->toDateString(),
                     'status' => $sampleStatuses[$i % count($sampleStatuses)],
+                    'stock_deducted' => false,
                     'total_amount' => $amount,
                     'total_qty' => $qtyTotal,
                     'notes' => null,

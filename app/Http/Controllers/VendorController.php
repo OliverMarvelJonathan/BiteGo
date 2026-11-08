@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Menu;
 use App\Models\Order;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class VendorController extends Controller
 {
@@ -41,19 +44,19 @@ class VendorController extends Controller
     /**
      * Update status pesanan (Menunggu → Dimasak → Siap Ambil → Selesai).
      */
-    public function updateStatus(Request $request, Order $order)
+    public function updateStatus(Request $request, Order $order, OrderService $orders)
     {
         if ($order->stall->user_id !== Auth::id()) {
             abort(403);
         }
 
         $data = $request->validate([
-            'status' => ['required', 'in:menunggu,dimasak,siap_ambil,selesai,dibatalkan'],
+            'status' => ['required', Rule::in(array_keys(Order::STATUS_LABELS))],
         ]);
 
-        $order->update(['status' => $data['status']]);
+        $updated = $orders->transition($order, $data['status']);
 
-        return back()->with('success', "Status pesanan {$order->order_number} diperbarui menjadi \"{$order->status_label}\".");
+        return back()->with('success', "Status pesanan {$updated->order_number} diperbarui menjadi \"{$updated->status_label}\".");
     }
 
     /**
@@ -126,16 +129,38 @@ class VendorController extends Controller
         $data = $request->validate([
             'price' => ['required', 'integer', 'min:100', 'max:10000000'],
             'stock' => ['required', 'integer', 'min:0', 'max:100000'],
+            'stock_baseline' => ['nullable', 'integer', 'min:0', 'max:100000'],
         ]);
 
-        $menu->update([
-            'price' => $data['price'],
-            'stock' => $data['stock'],
-            'is_available' => $request->boolean('is_available'),
-            'is_popular' => $request->boolean('is_popular'),
-        ]);
+        // Treat the submitted stock as a delta from the stock shown when the form was
+        // rendered. This keeps concurrent order deductions from being overwritten by a
+        // stale absolute value.
+        $baseline = (int) ($data['stock_baseline'] ?? $menu->stock);
+        $delta = (int) $data['stock'] - $baseline;
+        $isAvailable = $request->boolean('is_available');
+        $isPopular = $request->boolean('is_popular');
 
-        return back()->with('success', "Menu \"{$menu->name}\" berhasil diperbarui.");
+        $updated = DB::transaction(function () use ($menu, $data, $delta, $isAvailable, $isPopular) {
+            $locked = Menu::whereKey($menu->getKey())->lockForUpdate()->firstOrFail();
+            $newStock = $locked->stock + $delta;
+
+            if ($newStock < 0) {
+                throw ValidationException::withMessages([
+                    'stock' => "Stok tidak dapat dikurangi melebihi stok saat ini ({$locked->stock}).",
+                ]);
+            }
+
+            $locked->update([
+                'price' => $data['price'],
+                'stock' => $newStock,
+                'is_available' => $isAvailable,
+                'is_popular' => $isPopular,
+            ]);
+
+            return $locked;
+        }, 3);
+
+        return back()->with('success', "Menu \"{$updated->name}\" berhasil diperbarui.");
     }
 
     /**

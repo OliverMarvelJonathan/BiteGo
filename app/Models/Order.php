@@ -23,10 +23,27 @@ class Order extends Model
         'siap_ambil' => 'selesai',
     ];
 
+    public const CANCELLABLE_STATUSES = ['menunggu'];
+
     protected $fillable = [
-        'order_number', 'user_id', 'stall_id', 'pickup_slot', 'pickup_code',
-        'status', 'total_amount', 'total_qty', 'notes',
+        'order_number', 'idempotency_key', 'user_id', 'stall_id', 'pickup_slot', 'pickup_code', 'pickup_date',
+        'status', 'stock_deducted', 'total_amount', 'total_qty', 'notes',
     ];
+
+    protected $casts = [
+        'pickup_date' => 'date',
+        'stock_deducted' => 'boolean',
+    ];
+
+    public function canTransitionTo(string $status): bool
+    {
+        return (self::STATUS_NEXT[$this->status] ?? null) === $status;
+    }
+
+    public function canBeCancelled(): bool
+    {
+        return in_array($this->status, self::CANCELLABLE_STATUSES, true);
+    }
 
     public function user()
     {

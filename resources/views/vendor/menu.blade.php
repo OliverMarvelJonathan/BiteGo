@@ -151,6 +151,7 @@
                             <form action="{{ route('vendor.menu.update', $menu) }}" method="POST" class="flex flex-col md:flex-row md:items-center gap-4">
                                 @csrf
                                 @method('PATCH')
+                                <input type="hidden" name="stock_baseline" value="{{ $menu->stock }}">
 
                                 <div class="flex items-center gap-3 flex-1 min-w-0">
                                     <div class="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-mint-50 flex items-center justify-center">
@@ -200,7 +201,10 @@
                                     <button type="submit" class="inline-flex items-center gap-1.5 bg-mint-400 hover:bg-mint-500 text-white text-[11px] font-bold px-4 py-2.5 rounded-lg shadow-sm transition">
                                         <i class="fa-solid fa-floppy-disk text-[10px]"></i> Simpan
                                     </button>
-                                    <button type="button" onclick="if(confirm('Hapus menu \"{{ $menu->name }}\"?')){document.getElementById('delete-menu-{{ $menu->id }}').submit()}"
+                                    <button type="button"
+                                            data-delete-form="delete-menu-{{ $menu->id }}"
+                                            data-menu-name="{{ $menu->name }}"
+                                            onclick="if(confirm('Hapus menu ' + this.dataset.menuName + '?')){document.getElementById(this.dataset.deleteForm).submit()}"
                                             class="inline-flex items-center gap-1.5 text-rose-500 hover:bg-rose-50 text-[11px] font-semibold px-3 py-2.5 rounded-lg border border-rose-200 hover:border-rose-300 transition">
                                         <i class="fa-solid fa-trash text-[10px]"></i>
                                     </button>

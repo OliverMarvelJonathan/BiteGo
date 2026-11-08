@@ -109,12 +109,21 @@
                                     <p class="text-sm font-bold text-gray-900">{{ $order->user->name }}</p>
                                     <span class="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">{{ $order->user->kelas ?? '-' }}</span>
                                 </div>
-                                <p class="text-[11px] text-gray-400 mt-0.5 line-clamp-1">
-                                    @foreach ($order->items as $item){{ $item->menu_name }} ({{ $item->quantity }}) @endforeach
+                                <p class="text-[10px] font-mono text-gray-400 mt-0.5">{{ $order->order_number }}</p>
+                                <p class="text-[11px] text-gray-500 mt-1">
+                                    @foreach ($order->items as $item)
+                                        <span class="inline-block">{{ $item->menu_name }} <span class="font-semibold text-gray-700">&times;{{ $item->quantity }}</span>{{ $loop->last ? '' : ',' }}</span>
+                                    @endforeach
                                 </p>
                                 <p class="text-[11px] text-gray-400 mt-0.5 flex items-center gap-1.5">
                                     <i class="fa-solid fa-clock text-emerald-400"></i> {{ $order->pickup_slot_label }}
                                 </p>
+                                @if ($order->notes)
+                                    <div class="mt-2 flex items-start gap-1.5 bg-sunshine-100 border border-sunshine-300 rounded-lg px-2.5 py-1.5">
+                                        <i class="fa-solid fa-note-sticky text-sunshine-600 text-[10px] mt-0.5"></i>
+                                        <p class="text-[11px] text-gray-700 leading-snug"><span class="font-bold">Catatan:</span> {{ $order->notes }}</p>
+                                    </div>
+                                @endif
                             </div>
                         </div>
 
@@ -149,7 +158,7 @@
                                     </button>
                                 </form>
                             @endif
-                            @if ($order->status === 'menunggu')
+                            @if ($order->canBeCancelled())
                                 <form action="{{ route('vendor.orders.status', $order) }}" method="POST" onsubmit="return confirm('Batalkan pesanan ini?')">
                                     @csrf
                                     <input type="hidden" name="status" value="dibatalkan">

@@ -25,7 +25,7 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
@@ -34,7 +34,9 @@ class AuthController extends Controller
             'kelas' => $data['kelas'] ?? null,
         ]);
 
-        Auth::login(User::where('email', $data['email'])->first());
+        Auth::login($user);
+
+        $request->session()->regenerate();
 
         return redirect()->route('canteen.index')
             ->with('success', 'Akun berhasil dibuat. Selamat datang di BiteGo!');
@@ -64,11 +66,26 @@ class AuthController extends Controller
             ? route('vendor.dashboard')
             : route('canteen.index');
 
-        if ($request->filled('redirect') && str_starts_with($request->input('redirect'), '/')) {
-            return redirect($request->input('redirect'));
+        $redirect = $request->input('redirect');
+
+        if (is_string($redirect) && $this->isSafeLocalPath($redirect)) {
+            return redirect($redirect);
         }
 
         return redirect()->intended($fallback);
+    }
+
+    /**
+     * Only same-origin absolute paths are allowed. "//host" and "/\host" are treated
+     * as off-site by browsers, and whitespace/control characters can be stripped.
+     */
+    private function isSafeLocalPath(string $path): bool
+    {
+        if (! str_starts_with($path, '/') || str_starts_with($path, '//')) {
+            return false;
+        }
+
+        return preg_match('/[\s\\\\\x00-\x1F\x7F]/', $path) !== 1;
     }
 
     public function logout(Request $request)
