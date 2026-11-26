@@ -128,17 +128,21 @@ BiteGo dikembangkan dengan fokus pada tiga hal utama:
 
 **Modern** — menghadirkan pengalaman kantin berbasis teknologi melalui sistem pre-order dan status pesanan real-time.
 
-📖 Status Proyek
+## 📖 Status Proyek
 
-✅ Completed — Final Project
+> <img src="https://img.shields.io/badge/STATUS-COMPLETED-2ea44f?style=for-the-badge" alt="Completed">
 
-BiteGo telah menyelesaikan tahap pengembangan sebagai platform Smart Canteen berbasis web untuk kebutuhan pemesanan makanan kantin sekolah.
+BiteGo telah menyelesaikan tahap pengembangan sebagai platform **Smart Canteen** berbasis web untuk lingkungan kantin sekolah.
 
-Seluruh proses pengembangan telah mencapai tahap finalisasi, mulai dari perancangan UI/UX, pengembangan frontend dan backend, integrasi database, hingga pengujian dan persiapan demonstrasi aplikasi.
+Proyek ini telah melalui tahapan perancangan UI/UX, pengembangan frontend dan backend, integrasi database, serta finalisasi aplikasi.
 
-Project Status: Completed
-Development Phase: Finalized
-Project Type: School Final Project
+| Informasi | Detail |
+|---|---|
+| **Project Status** | Completed |
+| **Development Phase** | Finalized |
+| **Project Type** | School Final Project |
+
+---
 
 ## ⚙️ Instalasi dan Konfigurasi
 
