@@ -128,13 +128,256 @@ BiteGo dikembangkan dengan fokus pada tiga hal utama:
 
 **Modern** — menghadirkan pengalaman kantin berbasis teknologi melalui sistem pre-order dan status pesanan real-time.
 
-## 📖 Status Proyek
+📖 Status Proyek
 
-> 🚧 **In Development**
->
-> BiteGo merupakan proyek pengembangan aplikasi untuk kebutuhan tugas sekolah dan dirancang sebagai prototype **Smart Canteen**.
+✅ Completed — Final Project
+
+BiteGo telah menyelesaikan tahap pengembangan sebagai platform Smart Canteen berbasis web untuk kebutuhan pemesanan makanan kantin sekolah.
+
+Seluruh proses pengembangan telah mencapai tahap finalisasi, mulai dari perancangan UI/UX, pengembangan frontend dan backend, integrasi database, hingga pengujian dan persiapan demonstrasi aplikasi.
+
+Project Status: Completed
+Development Phase: Finalized
+Project Type: School Final Project
+
+## ⚙️ Instalasi dan Konfigurasi
+
+Ikuti langkah berikut untuk menjalankan BiteGo di lingkungan lokal.
+
+### Persyaratan Sistem
+
+Pastikan perangkat sudah memiliki:
+
+- PHP 8.3 atau lebih baru
+- Composer
+- Node.js dan npm
+- MySQL
+- Git
+
+### 1. Clone Repository
+
+Buka terminal dan jalankan:
+
+```bash
+git clone https://github.com/OliverMarvelJonathan/BiteGo.git
+```
+
+Masuk ke direktori proyek:
+
+```bash
+cd BiteGo
+```
+
+### 2. Install Dependencies
+
+Install seluruh dependencies Laravel:
+
+```bash
+composer install
+```
+
+Install dependencies frontend:
+
+```bash
+npm install
+```
+
+### 3. Konfigurasi Environment
+
+Salin file `.env.example` menjadi `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Untuk pengguna Windows, file tersebut juga dapat disalin secara manual melalui File Explorer.
+
+Generate application key:
+
+```bash
+php artisan key:generate
+```
+
+### 4. Konfigurasi Database
+
+Buat database baru melalui MySQL dengan nama:
+
+```sql
+CREATE DATABASE bitego;
+```
+
+Kemudian sesuaikan konfigurasi database pada file `.env`:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=bitego
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Sesuaikan username dan password dengan konfigurasi MySQL pada perangkat masing-masing.
+
+### 5. Migrasi dan Seed Database
+
+Jalankan migrasi untuk membuat tabel database:
+
+```bash
+php artisan migrate
+```
+
+Untuk mengisi database dengan data contoh (demo), jalankan:
+
+```bash
+php artisan db:seed
+```
+
+### 6. Menjalankan Aplikasi
+
+Jalankan server Laravel:
+
+```bash
+php artisan serve
+```
+
+Kemudian buka terminal baru dan jalankan Vite:
+
+```bash
+npm run dev
+```
+
+Buka aplikasi melalui browser:
+
+```text
+http://127.0.0.1:8000
+```
 
 ---
+
+## 📖 Panduan Penggunaan Aplikasi
+
+BiteGo memiliki dua jenis pengguna utama, yaitu siswa dan penjual kantin.
+
+### 👨‍🎓 Siswa
+
+1. Buka halaman BiteGo melalui browser.
+2. Buat akun melalui halaman Register.
+3. Login menggunakan akun yang telah dibuat.
+4. Pilih stand kantin yang tersedia.
+5. Pilih makanan atau minuman dari katalog menu.
+6. Tambahkan produk ke keranjang.
+7. Lanjutkan ke halaman Checkout.
+8. Lengkapi informasi pemesanan dan pilih jadwal pengambilan.
+9. Konfirmasi pesanan.
+10. Simpan kode unik 4 digit yang diberikan sistem.
+11. Pantau status pesanan melalui halaman pesanan.
+12. Ambil pesanan ketika status sudah Siap Ambil.
+
+### 🧑‍🍳 Penjual Kantin
+
+1. Login menggunakan akun penjual.
+2. Masuk ke Dashboard Penjual.
+3. Lihat daftar pesanan yang masuk.
+4. Perbarui status pesanan sesuai proses persiapan makanan.
+5. Kelola menu makanan dan minuman.
+6. Perbarui informasi menu sesuai ketersediaan produk.
+
+---
+
+## 🏗️ Arsitektur Sistem
+
+BiteGo menggunakan pendekatan Model-View-Controller (MVC) dari framework Laravel untuk memisahkan pengelolaan data, logika aplikasi, dan tampilan pengguna.
+
+### Komponen Arsitektur
+
+| Komponen | Teknologi | Tanggung Jawab |
+|---|---|---|
+| Frontend | Blade & Tailwind CSS | Menampilkan antarmuka pengguna |
+| Backend | Laravel 13 | Mengelola logika aplikasi dan pemrosesan pesanan |
+| Database | MySQL | Menyimpan data pengguna, menu, stand, dan pesanan |
+| Build Tool | Vite | Mengelola dan membangun aset frontend |
+| Version Control | Git & GitHub | Mengelola versi kode dan kolaborasi |
+
+### Alur Kerja Sistem
+
+1. Pengguna mengakses aplikasi melalui browser.
+2. Request diterima oleh sistem routing Laravel.
+3. Middleware memeriksa autentikasi dan hak akses pengguna.
+4. Controller memproses permintaan dan menjalankan logika aplikasi.
+5. Model berinteraksi dengan database melalui Eloquent ORM.
+6. Data dikirim kembali untuk ditampilkan melalui halaman aplikasi.
+
+### Struktur Direktori Utama
+
+```text
+BiteGo/
+├── app/
+│   ├── Http/
+│   │   └── Controllers/
+│   └── Models/
+├── bootstrap/
+├── config/
+├── database/
+│   ├── migrations/
+│   ├── seeders/
+│   └── factories/
+├── public/
+├── resources/
+│   ├── css/
+│   ├── js/
+│   └── views/
+├── routes/
+│   └── web.php
+├── storage/
+├── tests/
+├── .env.example
+├── artisan
+├── composer.json
+├── package.json
+└── vite.config.js
+```
+
+---
+
+## 🤝 Kontribusi dan Kolaborasi
+
+Pengembangan BiteGo dilakukan secara kolaboratif oleh tim TechBite menggunakan Git dan GitHub.
+
+Untuk menjaga keteraturan kode selama pengembangan, berikut alur kontribusi yang digunakan sebagai panduan:
+
+1. Pastikan repository sudah tersedia secara lokal.
+2. Buat branch baru sesuai fitur atau pekerjaan yang dikerjakan.
+3. Lakukan perubahan kode sesuai tanggung jawab masing-masing.
+4. Gunakan commit message yang jelas untuk setiap perubahan.
+5. Push branch ke repository GitHub.
+6. Buat Pull Request (PR) untuk proses pemeriksaan dan penggabungan kode.
+
+Contoh pembuatan branch:
+
+```bash
+git checkout -b feature/nama-fitur
+```
+
+Contoh commit:
+
+```bash
+git add .
+git commit -m "feat: add ordering feature"
+git push origin feature/nama-fitur
+```
+
+Setiap anggota tim bertanggung jawab menjaga kualitas kode, berkomunikasi selama proses pengembangan, dan memastikan fitur yang dibuat dapat berjalan dengan baik.
+
+---
+
+## 📄 Lisensi
+
+BiteGo menggunakan lisensi **MIT License**, sesuai deklarasi lisensi pada `composer.json`.
+
+Lisensi ini memberikan izin penggunaan, modifikasi, dan distribusi perangkat lunak sesuai ketentuan MIT License.
+
+Untuk informasi lebih lanjut mengenai lisensi, silakan lihat dokumentasi [MIT License](https://opensource.org/license/mit).
 
 ### 💚 BiteGo
 **Segar. Cepat. Lezat.**
